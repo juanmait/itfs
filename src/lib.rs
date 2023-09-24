@@ -3,7 +3,7 @@ Iterator similar to the standard [fs::ReadDir] but recursive.
 
 **WARNING** The recursive iteration of directories seems to be very fast but applied to directories
 with many files and/or subdirectories can lead to panics due to **stack overflows** 💥.
-Seems like not much of the hip is being used and everything goes into the stack 🔥.
+Seems like not much of the heap is being used and everything goes into the stack 🔥.
 
 */
 
