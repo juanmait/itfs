@@ -19,21 +19,57 @@ pub struct RDRStats {
     pub total_iterations: usize,
 }
 
-/// Iterator similar to the standard [fs::ReadDir] but recursive.
+/**
+Iterator similar to the standard [fs::ReadDir] but recursive.
+
+## Iteration Example:
+```
+use readdir_recursive::ReadDirRecursive;
+
+let rdr = ReadDirRecursive::new(".").unwrap();
+
+for entry_result in rdr {
+    let entry = entry_result.unwrap();
+    println!("Found file: '{:?}'", entry.path());
+}
+```
+
+## Print some stats afterward:
+```
+use readdir_recursive::ReadDirRecursive;
+
+let mut rdr = ReadDirRecursive::new(".").unwrap();
+
+// use a reference to `rdr` this time (it allows to access
+// it later after the loop).
+for entry_result in rdr.by_ref() {
+    let entry = entry_result.unwrap();
+    println!("Found file: '{:?}'", entry.path());
+}
+
+println!("{:?}", rdr.stats);
+```
+
+*/
 #[derive(Debug)]
 pub struct ReadDirRecursive {
     /// This field hods the [fs::ReadDir] instance that is currently being iterated.
     ///
-    /// At the beginning it holds the iterator for the root directory (the path given to
-    /// the `new` method), but later when all files on it where consumed (the iterator for
-    /// the folder reached the end) it will be replaced by new instances of [fs::ReadDir]
-    /// as the process visit the subdirectories.
+    /// At the beginning, it holds the [fs::ReadDir] iterator of the root directory
+    /// (given as param) but later, when all entries in the root where consumed (the
+    /// iterator reached the end) it will be replaced by a new instances of [fs::ReadDir]
+    /// as the main iteration continues visiting subdirectories of the root.
     pub read_dir: fs::ReadDir,
-    /// Directories are not visited immediately after being found. Instead they're
-    /// pushed onto a queue for a later inspection once the current directory is done and all
-    /// entries were consumed.
+    /// Sub Directories are not visited immediately when found. Instead they're
+    /// pushed onto a vector of pending directories/[entries][fs::DirEntry] (this field)
+    /// and the iteration of the current directory continues with the next entry.
+    /// Once that iteration is done, [ReadDirRecursive] will `pop` one entry from this,
+    /// create an instance of [fs::ReadDir] and resume the iteration.
+    ///
+    /// **This also means that this vector can easily grow like crazy in deep nested
+    /// file trees, or in the presence of recursive symbolic links (stack overflow 💥)**
     pub pending_dirs: Vec<fs::DirEntry>,
-    /// stores some stats about the ongoing iteration
+    /// Stores some data about the ongoing iteration. Mostly for debugging.
     pub stats: RDRStats,
 }
 
@@ -41,6 +77,8 @@ impl ReadDirRecursive {
     /// Create a new instance of [ReadDirRecursive] for the given path.
     ///
     /// ```
+    /// use readdir_recursive::ReadDirRecursive;
+    ///
     /// let rdr = ReadDirRecursive::new("/some/path");
     /// ```
     pub fn new<P: AsRef<path::Path>>(path: P) -> io::Result<Self> {
@@ -71,6 +109,7 @@ impl Iterator for ReadDirRecursive {
 
                         self.stats.total_dirs_consumed += 1;
 
+                        // inspect/update max_stacked_dirs
                         if self.pending_dirs.len() > self.stats.max_stacked_dirs {
                             self.stats.max_stacked_dirs = self.pending_dirs.len();
                         }
@@ -83,7 +122,7 @@ impl Iterator for ReadDirRecursive {
                     Some(Ok(entry))
                 }
                 // Error trying to obtain the entry's metadata.
-                // Since we can know if the entry is a file or directory we just return the
+                // Since we won't know if the entry was a file or a directory we just return the
                 // error instead of the entry.
                 Err(e) => Some(Err(e)),
             },
@@ -114,8 +153,44 @@ impl Iterator for ReadDirRecursive {
 ///
 /// Example:
 /// ```
+/// use readdir_recursive::ReadDirRecursive;
+///
 /// let rdr = ReadDirRecursive::new("/some/path");
 /// ```
 pub fn read_dir_recursive<P: AsRef<path::Path>>(path: P) -> io::Result<ReadDirRecursive> {
     ReadDirRecursive::new(path)
+}
+
+/// Run this tests:
+///
+/// ```
+/// cargo test -- --nocapture
+/// ```
+#[cfg(test)]
+mod test {
+    /// ```bash
+    /// cargo test test::iterate -- --nocapture
+    /// ```
+    #[test]
+    fn iterate() {
+        let rdr = super::ReadDirRecursive::new("../../").unwrap();
+
+        for (i, entry_result) in rdr.enumerate() {
+            println!("{} Found file: '{:?}'", i, entry_result.unwrap().path());
+        }
+    }
+
+    /// ```bash
+    /// cargo test test::print_stats -- --nocapture
+    /// ```
+    #[test]
+    fn print_stats() {
+        let mut rdr = super::ReadDirRecursive::new("../").unwrap();
+
+        for (i, entry_result) in rdr.by_ref().enumerate() {
+            println!("{} Found file: '{:?}'", i, entry_result.unwrap().path());
+        }
+
+        println!("{:?}", rdr.stats);
+    }
 }
