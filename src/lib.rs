@@ -1,15 +1,13 @@
 /*!
 Iterator similar to the standard [fs::ReadDir] but recursive.
 
-**WARNING** The recursive iteration of directories seems to be very fast but applied to directories
-with many files and/or subdirectories can lead to panics due to **stack overflows** 💥.
-Seems like not much of the heap is being used and everything goes into the stack 🔥.
-
+**WARNING** Iteration over directories with many files and/or subdirectories can lead to panics
+due to **stack overflows** when is done in dev mode instead of release mode (`--release`).
 */
 
 use std::{fs, io, path};
 
-/// Stores statistic data about the items found in the iteration of [ReadDirRecursive]
+/// Stores some numbers about the items found in the iteration of [ReadDirRecursive]
 #[derive(Default, Debug)]
 pub struct RDRStats {
     /// Maximum registered number of directories waiting for inspection.
@@ -63,11 +61,8 @@ pub struct ReadDirRecursive {
     /// Sub Directories are not visited immediately when found. Instead they're
     /// pushed onto a vector of pending directories/[entries][fs::DirEntry] (this field)
     /// and the iteration of the current directory continues with the next entry.
-    /// Once that iteration is done, [ReadDirRecursive] will `pop` one entry from this,
+    /// Once that iteration is done, [ReadDirRecursive] will `pop` one entry from this stack,
     /// create an instance of [fs::ReadDir] and resume the iteration.
-    ///
-    /// **This also means that this vector can easily grow like crazy in deep nested
-    /// file trees, or in the presence of recursive symbolic links (stack overflow 💥)**
     pub pending_dirs: Vec<fs::DirEntry>,
     /// Stores some data about the ongoing iteration. Mostly for debugging.
     pub stats: RDRStats,
