@@ -5,15 +5,18 @@ Iterator similar to the standard [fs::ReadDir] but recursive.
 due to **stack overflows** when is done in dev mode instead of release mode (`--release`).
 */
 
-use std::{fs, io, path};
+use std::{collections::HashMap, fs, io, path, time};
 
 /// Stores some numbers about the items found in the iteration of [ReadDirRecursive]
 #[derive(Default, Debug)]
 pub struct RDRStats {
+    /// Marks the start of the iteration (first call to next) in seconds since [time::UNIX_EPOCH]
+    pub iteration_started: Option<u64>,
     /// Maximum registered number of directories waiting for inspection.
     pub max_stacked_dirs: usize,
     pub total_files_consumed: usize,
     pub total_dirs_consumed: usize,
+    /// This is essentially the total number of calls to the `next` method
     pub total_iterations: usize,
 }
 
@@ -49,8 +52,10 @@ println!("{:?}", rdr.stats);
 ```
 
 */
-#[derive(Debug)]
+
 pub struct ReadDirRecursive {
+    /// Path of the directory currently being iterated
+    pub current_path: path::PathBuf,
     /// This field hods the [fs::ReadDir] instance that is currently being iterated.
     ///
     /// At the beginning, it holds the [fs::ReadDir] iterator of the root directory
@@ -66,6 +71,13 @@ pub struct ReadDirRecursive {
     pub pending_dirs: Vec<fs::DirEntry>,
     /// Stores some data about the ongoing iteration. Mostly for debugging.
     pub stats: RDRStats,
+    /// Record of errors triggered while obtaining DirEntry's metadata.
+    /// It is [HashMap] where the keys are the string representation of the error
+    /// and values are collections of the different entry paths that triggered
+    /// such error.
+    pub meta_errors: HashMap<String, Vec<String>>,
+    /// Errors registered while calling the inner readdir's `next` method
+    pub rd_errors: HashMap<String, Vec<String>>,
 }
 
 impl ReadDirRecursive {
@@ -78,10 +90,65 @@ impl ReadDirRecursive {
     /// ```
     pub fn new<P: AsRef<path::Path>>(path: P) -> io::Result<Self> {
         Ok(ReadDirRecursive {
+            current_path: path.as_ref().to_owned(),
             pending_dirs: vec![],
-            read_dir: fs::read_dir(path)?,
+            read_dir: fs::read_dir(&path)?,
             stats: RDRStats::default(),
+            meta_errors: HashMap::default(),
+            rd_errors: HashMap::default(),
         })
+    }
+
+    pub fn mark_start(&mut self) {
+        let r = time::SystemTime::now()
+            .duration_since(time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        self.stats.iteration_started = Some(r);
+    }
+
+    /// Push the directory onto `pending_dirs` queue and update
+    /// directory related stats.
+    pub fn digest_dir(&mut self, entry: fs::DirEntry) {
+        // push the directory onto the stack
+        self.pending_dirs.push(entry);
+        self.stats.total_dirs_consumed += 1;
+
+        // inspect/update max_stacked_dirs
+        if self.pending_dirs.len() > self.stats.max_stacked_dirs {
+            self.stats.max_stacked_dirs = self.pending_dirs.len();
+        }
+    }
+
+    /// update the `meta_errors`` record
+    pub fn register_meta_error(&mut self, e: &io::Error, entry: &fs::DirEntry) {
+        let err_str = e.to_string();
+        // register the error String alongside the path
+        if !self.meta_errors.contains_key(err_str.as_str()) {
+            self.meta_errors.insert(err_str.to_owned(), vec![]);
+        }
+
+        // get a mutable reference to the collection of paths associated with this error
+        let errors_collection = self.meta_errors.get_mut(err_str.as_str()).unwrap();
+        // create an owned path string from the current entry
+        let path_string = entry.path().as_os_str().to_str().unwrap().to_string();
+        // move the path into the errors collection
+        errors_collection.push(path_string);
+    }
+
+    /// update the `rd_errors`` record
+    pub fn register_rd_error(&mut self, e: &io::Error) {
+        let err_str = e.to_string();
+        // register the error String alongside the path
+        if !self.rd_errors.contains_key(err_str.as_str()) {
+            self.rd_errors.insert(err_str.to_owned(), vec![]);
+        }
+
+        // get a mutable reference to the collection of paths associated with this error
+        let errors_collection = self.rd_errors.get_mut(err_str.as_str()).unwrap();
+        let path_string = self.current_path.as_os_str().to_str().unwrap().to_string();
+        // move the path into the errors collection
+        errors_collection.push(path_string);
     }
 }
 
@@ -91,6 +158,9 @@ impl Iterator for ReadDirRecursive {
     type Item = io::Result<fs::DirEntry>;
 
     fn next(&mut self) -> Option<Self::Item> {
+        if self.stats.iteration_started.is_none() {
+            self.mark_start();
+        }
         self.stats.total_iterations += 1;
         match self.read_dir.next() {
             // entry found
@@ -99,15 +169,8 @@ impl Iterator for ReadDirRecursive {
                     // if the entry is a directory we need to save it for later inspection
                     // and move to the next entry in the iterator..
                     if meta.is_dir() {
-                        // push the directory onto the stack
-                        self.pending_dirs.push(entry);
+                        self.digest_dir(entry);
 
-                        self.stats.total_dirs_consumed += 1;
-
-                        // inspect/update max_stacked_dirs
-                        if self.pending_dirs.len() > self.stats.max_stacked_dirs {
-                            self.stats.max_stacked_dirs = self.pending_dirs.len();
-                        }
                         // move to the next entry
                         return self.next();
                     }
@@ -119,19 +182,28 @@ impl Iterator for ReadDirRecursive {
                 // Error trying to obtain the entry's metadata.
                 // Since we won't know if the entry was a file or a directory we just return the
                 // error instead of the entry.
-                Err(e) => Some(Err(e)),
+                Err(e) => {
+                    self.register_meta_error(&e, &entry);
+                    Some(Err(e))
+                }
             },
             // Entry found but is an error. No special treatment, we just return the error as is
-            Some(Err(err)) => Some(Err(err)),
+            Some(Err(err)) => {
+                self.register_rd_error(&err);
+                Some(Err(err))
+            }
             // The current `read_dir` iterator reached the end (there are no more
             // files/entries in this directory).
             None => {
                 // deal with the next pending directory (if any)
                 if let Some(dir_entry) = self.pending_dirs.pop() {
-                    match fs::read_dir(dir_entry.path()) {
+                    let entry_path = dir_entry.path();
+                    match fs::read_dir(&entry_path) {
                         Ok(read_dir) => {
                             // throw away the consumed iterator and put the new one in his place
                             self.read_dir = read_dir;
+                            // do the same for the path
+                            self.current_path = entry_path;
                             return self.next();
                         }
                         Err(e) => return Some(Err(e)),
@@ -168,7 +240,7 @@ mod test {
     /// ```
     #[test]
     fn iterate() {
-        let rdr = super::ReadDirRecursive::new("../../").unwrap();
+        let rdr = super::ReadDirRecursive::new(".").unwrap();
 
         for (i, entry_result) in rdr.enumerate() {
             println!("{} Found file: '{:?}'", i, entry_result.unwrap().path());
@@ -180,7 +252,7 @@ mod test {
     /// ```
     #[test]
     fn print_stats() {
-        let mut rdr = super::ReadDirRecursive::new("../").unwrap();
+        let mut rdr = super::ReadDirRecursive::new(".").unwrap();
 
         for (i, entry_result) in rdr.by_ref().enumerate() {
             println!("{} Found file: '{:?}'", i, entry_result.unwrap().path());
