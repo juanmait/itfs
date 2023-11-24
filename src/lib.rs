@@ -81,12 +81,13 @@ pub struct ReadDirRecursive {
 }
 
 impl ReadDirRecursive {
-    /// Create a new instance of [ReadDirRecursive] for the given path.
+    /// Create a new instance of [ReadDirRecursive] for the given path. This operation
+    /// can fail if [fs::read_dir] fails while trying to read from the specified path.
     ///
     /// ```
     /// use readdir_recursive::ReadDirRecursive;
     ///
-    /// let rdr = ReadDirRecursive::new("/some/path");
+    /// let rdr = ReadDirRecursive::new("/some/path").unwrap();
     /// ```
     pub fn new<P: AsRef<path::Path>>(path: P) -> io::Result<Self> {
         Ok(ReadDirRecursive {
@@ -215,14 +216,16 @@ impl Iterator for ReadDirRecursive {
     }
 }
 
-/// Create an instance of [ReadDirRecursive] for the given path.
+/// Create an instance of [ReadDirRecursive] for the given path. This operation
+/// will fail if [fs::read_dir] fails while trying to read from the specified path.
+///
 /// The same can be achieved by passing the path to the `new` method of [ReadDirRecursive].
 ///
 /// Example:
 /// ```
 /// use readdir_recursive::ReadDirRecursive;
 ///
-/// let rdr = ReadDirRecursive::new("/some/path");
+/// let rdr = ReadDirRecursive::new("/some/path").unwrap();
 /// ```
 pub fn read_dir_recursive<P: AsRef<path::Path>>(path: P) -> io::Result<ReadDirRecursive> {
     ReadDirRecursive::new(path)
