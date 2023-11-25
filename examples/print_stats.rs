@@ -20,13 +20,13 @@ use std::time;
 /// - Permission denied (os error 13)
 /// - Too many open files (os error 24)
 fn main() {
-    let now = time::SystemTime::now();
-    // record the start time of the iteration
+    let path = std::path::PathBuf::from(".");
+    let mut iterator = read_dir_recursive(&path).unwrap();
     let iter_started = time::Instant::now();
-    let mut rdr = read_dir_recursive(".").unwrap();
 
-    println!("Started at {:?}", now);
-    for (i, r) in rdr.by_ref().enumerate() {
+    println!("Started at root {:?}..", path.as_os_str());
+
+    for (i, r) in iterator.by_ref().enumerate() {
         match r {
             Ok(_) => (),
             Err(e) => eprintln!("{i} {e}"),
@@ -35,9 +35,9 @@ fn main() {
 
     let elapsed = time::Instant::now().duration_since(iter_started);
     println!("Finished. Iteration took {elapsed:?} \n");
-    println!("Stats: {:?}", rdr.stats);
+    println!("Stats: {:?}", iterator.stats);
     println!("");
-    println!("Meta Errors: {:?}", rdr.meta_errors);
+    println!("Meta Errors: {:?}", iterator.meta_errors);
     println!("");
-    println!("RD Errors: {:?}", rdr.rd_errors);
+    println!("RD Errors: {:?}", iterator.rd_errors);
 }

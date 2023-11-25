@@ -168,7 +168,7 @@ impl Iterator for ReadDirRecursive {
             Some(Ok(entry)) => match entry.metadata() {
                 Ok(meta) => {
                     // if the entry is a directory we need to save it for later inspection
-                    // and move to the next entry in the iterator..
+                    // and move on to the next entry in the iterator..
                     if meta.is_dir() {
                         self.digest_dir(entry);
 
@@ -207,7 +207,10 @@ impl Iterator for ReadDirRecursive {
                             self.current_path = entry_path;
                             return self.next();
                         }
-                        Err(e) => return Some(Err(e)),
+                        Err(e) => {
+                            self.register_rd_error(&e);
+                            return Some(Err(e));
+                        }
                     }
                 }
                 None
