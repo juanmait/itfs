@@ -9,7 +9,9 @@ pub struct RDRStats {
     pub iteration_started: Option<u64>,
     /// Maximum registered number of directories waiting for inspection.
     pub max_stacked_dirs: usize,
+    /// Count of the total files seen so far.
     pub total_files_consumed: usize,
+    /// Count of the total directories seen so far.
     pub total_dirs_consumed: usize,
     /// This is essentially the total number of calls to the `next` method
     pub total_iterations: usize,
