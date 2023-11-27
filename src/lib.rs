@@ -92,7 +92,7 @@ impl ReadDirRecursive {
         })
     }
 
-    pub fn mark_start(&mut self) {
+    fn mark_start(&mut self) {
         let r = time::SystemTime::now()
             .duration_since(time::UNIX_EPOCH)
             .unwrap()
@@ -102,7 +102,7 @@ impl ReadDirRecursive {
 
     /// Push the directory onto `pending_dirs` queue and update
     /// directory related stats.
-    pub fn digest_dir(&mut self, entry: fs::DirEntry) {
+    fn digest_dir(&mut self, entry: fs::DirEntry) {
         // push the directory onto the stack
         self.pending_dirs.push(entry);
         self.stats.total_dirs_consumed += 1;
@@ -114,7 +114,7 @@ impl ReadDirRecursive {
     }
 
     /// update the `meta_errors`` record
-    pub fn register_meta_error(&mut self, e: &io::Error, entry: &fs::DirEntry) {
+    fn register_meta_error(&mut self, e: &io::Error, entry: &fs::DirEntry) {
         let err_str = e.to_string();
         // register the error String alongside the path
         if !self.meta_errors.contains_key(err_str.as_str()) {
@@ -130,7 +130,7 @@ impl ReadDirRecursive {
     }
 
     /// update the `rd_errors`` record
-    pub fn register_rd_error(&mut self, e: &io::Error) {
+    fn register_rd_error(&mut self, e: &io::Error) {
         let err_str = e.to_string();
         // register the error String alongside the path
         if !self.rd_errors.contains_key(err_str.as_str()) {
