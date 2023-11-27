@@ -1,9 +1,4 @@
-/*!
-Iterator similar to the standard [fs::ReadDir] but recursive.
-
-**WARNING** Iteration over directories with many files and/or subdirectories can lead to panics
-due to **stack overflows** when is done in dev mode instead of release mode (`--release`).
-*/
+//! Iterator similar to the standard [fs::ReadDir] but recursive.
 
 use std::{collections::HashMap, fs, io, path, time};
 
@@ -20,41 +15,38 @@ pub struct RDRStats {
     pub total_iterations: usize,
 }
 
-/**
-Iterator similar to the standard [fs::ReadDir] but recursive.
-
-## Iteration Example:
-```
-use readdir_recursive::ReadDirRecursive;
-
-let rdr = ReadDirRecursive::new(".").unwrap();
-
-for entry_result in rdr {
-    let entry = entry_result.unwrap();
-    println!("Found file: '{:?}'", entry.path());
-}
-```
-
-## Print some stats afterward:
-```
-use readdir_recursive::ReadDirRecursive;
-
-let mut rdr = ReadDirRecursive::new(".").unwrap();
-
-// use a reference to `rdr` this time (it allows to access
-// it later after the loop).
-for entry_result in rdr.by_ref() {
-    let entry = entry_result.unwrap();
-    println!("Found file: '{:?}'", entry.path());
-}
-
-println!("{:?}", rdr.stats);
-```
-
-*/
-
+/// Iterator similar to the standard [fs::ReadDir] but recursive.
+///
+/// ## Iteration Example:
+/// ```
+/// use readdir_recursive::ReadDirRecursive;
+///
+/// let rdr = ReadDirRecursive::new(".").unwrap();
+///
+/// for entry_result in rdr {
+///     let entry = entry_result.unwrap();
+///     println!("Found file: '{:?}'", entry.path());
+/// }
+/// ```
+///
+/// ## Print some stats afterward:
+/// ```
+/// use readdir_recursive::ReadDirRecursive;
+///
+/// let mut rdr = ReadDirRecursive::new(".").unwrap();
+///
+/// // use a reference to `rdr` this time (it allows to access
+/// // it later after the loop).
+/// for entry_result in rdr.by_ref() {
+///     let entry = entry_result.unwrap();
+///     println!("Found file: '{:?}'", entry.path());
+/// }
+///
+/// println!("{:?}", rdr.stats);
+/// ```
 pub struct ReadDirRecursive {
-    /// Path of the directory currently being iterated
+    /// Path of the directory currently being iterated. Initially this is the root path
+    /// where the iteration will start.
     pub current_path: path::PathBuf,
     /// This field hods the [fs::ReadDir] instance that is currently being iterated.
     ///
@@ -162,58 +154,79 @@ impl Iterator for ReadDirRecursive {
         if self.stats.iteration_started.is_none() {
             self.mark_start();
         }
+
         self.stats.total_iterations += 1;
-        match self.read_dir.next() {
-            // entry found
-            Some(Ok(entry)) => match entry.metadata() {
-                Ok(meta) => {
-                    // if the entry is a directory we need to save it for later inspection
-                    // and move on to the next entry in the iterator..
-                    if meta.is_dir() {
-                        self.digest_dir(entry);
 
-                        // move to the next entry
-                        return self.next();
+        loop {
+            match self.read_dir.next() {
+                // entry found
+                Some(Ok(entry)) => match entry.metadata() {
+                    Ok(meta) => {
+                        // if the entry is a directory we need to save it for later inspection
+                        // and move on to the next entry in the iterator..
+                        if meta.is_dir() {
+                            self.digest_dir(entry);
+                            // move to the next entry
+                            continue;
+                        }
+
+                        // if the entry is not a directory we just assume that is a file
+                        self.stats.total_files_consumed += 1;
+
+                        // Something was found. Break the loop
+                        // and return what was found..
+                        break Some(Ok(entry));
+                    }
+                    // Error trying to obtain the entry's metadata.
+                    // Since we won't know if the entry was a file or a directory we just return the
+                    // error instead of the entry.
+                    Err(e) => {
+                        self.register_meta_error(&e, &entry);
+
+                        // Something was found. Break the loop
+                        // and return what was found..
+                        break Some(Err(e));
+                    }
+                },
+                // Entry found but is an error. No special treatment, we just return the error as is
+                Some(Err(err)) => {
+                    self.register_rd_error(&err);
+
+                    // Something was found. Break the loop
+                    // and return what was found..
+                    break Some(Err(err));
+                }
+                // The current `read_dir` iterator reached the end (there are no more
+                // files/entries in this directory).
+                // We need to either move on to the next directory in the queue if there is any
+                // or finish the iteration completely.
+                None => {
+                    // deal with the next pending directory (if any)
+                    if let Some(dir_entry) = self.pending_dirs.pop() {
+                        let entry_path = dir_entry.path();
+                        match fs::read_dir(&entry_path) {
+                            Ok(read_dir) => {
+                                // throw away the consumed iterator and put the new one in his place
+                                self.read_dir = read_dir;
+                                // do the same for the path
+                                self.current_path = entry_path;
+
+                                // skip to the next iteration
+                                continue;
+                            }
+                            Err(e) => {
+                                self.register_rd_error(&e);
+
+                                // Something was found. Stop the loop
+                                // so we can return what was found
+                                break Some(Err(e));
+                            }
+                        }
                     }
 
-                    // if the entry is not a directory we just assume that is a file
-                    self.stats.total_files_consumed += 1;
-                    Some(Ok(entry))
+                    // there are no more directories to go through
+                    break None;
                 }
-                // Error trying to obtain the entry's metadata.
-                // Since we won't know if the entry was a file or a directory we just return the
-                // error instead of the entry.
-                Err(e) => {
-                    self.register_meta_error(&e, &entry);
-                    Some(Err(e))
-                }
-            },
-            // Entry found but is an error. No special treatment, we just return the error as is
-            Some(Err(err)) => {
-                self.register_rd_error(&err);
-                Some(Err(err))
-            }
-            // The current `read_dir` iterator reached the end (there are no more
-            // files/entries in this directory).
-            None => {
-                // deal with the next pending directory (if any)
-                if let Some(dir_entry) = self.pending_dirs.pop() {
-                    let entry_path = dir_entry.path();
-                    match fs::read_dir(&entry_path) {
-                        Ok(read_dir) => {
-                            // throw away the consumed iterator and put the new one in his place
-                            self.read_dir = read_dir;
-                            // do the same for the path
-                            self.current_path = entry_path;
-                            return self.next();
-                        }
-                        Err(e) => {
-                            self.register_rd_error(&e);
-                            return Some(Err(e));
-                        }
-                    }
-                }
-                None
             }
         }
     }

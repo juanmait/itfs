@@ -7,12 +7,6 @@ use std::time;
 /// cargo run --example print_stats
 /// ```
 ///
-/// ## Run in --release mode (prevents stack overflows)
-///
-/// ```bash
-/// cargo run --example print_stats --release
-/// ```
-///
 /// ## List of Seen Errors
 ///
 /// - Bad file descriptor (os error 9)

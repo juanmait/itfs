@@ -6,12 +6,6 @@ use std::time;
 /// ```bash
 /// cargo run --example iteration
 /// ```
-///
-/// ## Run in --release mode (prevents stack overflows)
-///
-/// ```bash
-/// cargo run --example iteration --release
-/// ```
 fn main() {
     let path = std::path::PathBuf::from(".");
 
