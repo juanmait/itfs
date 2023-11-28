@@ -165,7 +165,7 @@ impl Iterator for ReadDirRecursive {
                 Some(Ok(entry)) => match entry.metadata() {
                     Ok(meta) => {
                         // if the entry is a directory we need to save it for later inspection
-                        // and move on to the next entry in the iterator..
+                        // and move on to the next entry in in the current directory.
                         if meta.is_dir() {
                             self.digest_dir(entry);
                             // move to the next entry
@@ -198,12 +198,10 @@ impl Iterator for ReadDirRecursive {
                     // and return what was found..
                     break Some(Err(err));
                 }
-                // The current `read_dir` iterator reached the end (there are no more
-                // files/entries in this directory).
-                // We need to either move on to the next directory in the queue if there is any
-                // or finish the iteration completely.
+                // The current `ReadDir` iterator reached the end (there are no more entries in it).
                 None => {
-                    // deal with the next pending directory (if any)
+                    // We need to either move on to the next directory in the queue if there is any
+                    // or finish the iteration completely.
                     if let Some(dir_entry) = self.pending_dirs.pop() {
                         let entry_path = dir_entry.path();
                         match fs::read_dir(&entry_path) {
