@@ -21,7 +21,7 @@ pub struct RDRStats {
 ///
 /// ## Iteration Example:
 /// ```
-/// use readdir_recursive::ReadDirRecursive;
+/// use itfs::ReadDirRecursive;
 ///
 /// let rdr = ReadDirRecursive::new(".").unwrap();
 ///
@@ -33,7 +33,7 @@ pub struct RDRStats {
 ///
 /// ## Print some stats afterward:
 /// ```
-/// use readdir_recursive::ReadDirRecursive;
+/// use itfs::ReadDirRecursive;
 ///
 /// let mut rdr = ReadDirRecursive::new(".").unwrap();
 ///
@@ -79,7 +79,7 @@ impl ReadDirRecursive {
     /// can fail if [fs::read_dir] fails while trying to read from the specified path.
     ///
     /// ```
-    /// use readdir_recursive::ReadDirRecursive;
+    /// use itfs::ReadDirRecursive;
     ///
     /// let rdr = ReadDirRecursive::new("/some/path").unwrap();
     /// ```
@@ -239,7 +239,7 @@ impl Iterator for ReadDirRecursive {
 ///
 /// Example:
 /// ```
-/// use readdir_recursive::ReadDirRecursive;
+/// use itfs::ReadDirRecursive;
 ///
 /// let rdr = ReadDirRecursive::new("/some/path").unwrap();
 /// ```

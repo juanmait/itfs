@@ -1,4 +1,4 @@
-use readdir_recursive::read_dir_recursive;
+use itfs::read_dir_recursive;
 use std::time;
 
 /// ## Run this example

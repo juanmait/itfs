@@ -1,5 +1,5 @@
 [package]
-name = "readdir-recursive"
+name = "itfs"
 # https://semver.org/
 version = "0.2.0"
 edition = "2021"
