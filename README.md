@@ -1,7 +1,6 @@
-# ReadDirRecursive
+# itfs
 
-A simple Rust library that creates an iterator similar to the standard
-[fs::ReadDir](https://doc.rust-lang.org/std/fs/struct.ReadDir.html) but recursive.
+A set of Rust iterators and iterator adaptors useful for iterating over the file system.
 
 ## Generate and open the documentation
 

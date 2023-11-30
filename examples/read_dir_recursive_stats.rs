@@ -4,7 +4,7 @@ use std::time;
 /// ## Run this example
 ///
 /// ```bash
-/// cargo run --example print_stats
+/// cargo run --example read_dir_recursive_stats
 /// ```
 ///
 /// ## List of Seen Errors
@@ -20,6 +20,8 @@ fn main() {
 
     println!("Started at root {:?}..", path.as_os_str());
 
+    // take the iterator by_ref so we can still access it after the iteration
+    // is done..
     for (i, r) in iterator.by_ref().enumerate() {
         match r {
             Ok(_) => (),

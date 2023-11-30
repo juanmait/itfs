@@ -4,7 +4,7 @@ use std::time;
 /// ## Run this example
 ///
 /// ```bash
-/// cargo run --example iteration
+/// cargo run --example read_dir_recursive
 /// ```
 fn main() {
     let path = std::path::PathBuf::from(".");
