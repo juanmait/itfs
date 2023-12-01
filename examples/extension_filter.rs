@@ -1,8 +1,8 @@
 use std::fs::read_dir;
 
-use fs_iter::extension_filter::create_extension_filter;
-use fs_iter::rdr::read_dir_recursive;
-use fs_iter::result_filter::ResultFilter;
+use itfs::extension_filter::{create_extension_filter, ExtensionFilter};
+use itfs::rdr::ReadDirRecursive;
+use itfs::result_filter::ResultFilter;
 
 fn main() {
     const PATH: &'static str = ".";
@@ -35,14 +35,16 @@ fn main() {
     }
 
     // Same as above but using `ReadDirRecursive` instead of ReadDir
+    // and a different style
     // ---------------------------------------------------------------
 
-    let files_iterator = read_dir_recursive(PATH).unwrap();
-    let result_filter = ResultFilter(files_iterator);
-    let extension_filter = create_extension_filter(result_filter, allowed_extensions.clone());
+    let itr = ExtensionFilter::new(
+        ResultFilter(ReadDirRecursive::new(".").unwrap()),
+        allowed_extensions,
+    );
 
     println!("\nStarting ExtensionFilter -> ResultFilter -> ReadDirRecursive...");
-    for item in extension_filter {
-        println!("{:?}", item.file_name())
+    for entry in itr {
+        println!("{:?}", entry.file_name())
     }
 }
