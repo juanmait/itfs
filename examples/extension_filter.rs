@@ -1,8 +1,8 @@
 use std::fs::read_dir;
 
-use itfs::extension_filter::create_extension_filter;
-use itfs::rdr::read_dir_recursive;
-use itfs::result_filter::ResultFilter;
+use fs_iter::extension_filter::create_extension_filter;
+use fs_iter::rdr::read_dir_recursive;
+use fs_iter::result_filter::ResultFilter;
 
 fn main() {
     const PATH: &'static str = ".";

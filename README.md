@@ -1,4 +1,4 @@
-# itfs
+# fs_iter
 
 A set of Rust iterators and iterator adaptors useful for iterating over the file system.
 
