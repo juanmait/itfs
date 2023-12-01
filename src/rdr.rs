@@ -1,5 +1,4 @@
-//! Iterator similar to the standard [fs::ReadDir] but recursive.
-
+//! Export the `struct` [`ReadDirRecursive`]. Iterator similar to the standard [fs::ReadDir] but recursive.
 use std::{collections::HashMap, fs, io, path, time};
 
 /// Stores some numbers about the items found in the iteration of [ReadDirRecursive]

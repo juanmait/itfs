@@ -1,4 +1,5 @@
-//! Export the `struct` [`ResultFilter`].
+//! Export the `struct` [`ResultFilter`]. Map an iterator over items of type [`Result<T>`]
+//! into one over items of type `T` by discarding [Err] variants.
 
 /// Map an iterator over items of type [`Result<T>`] into one over items of type `T`
 /// by discarding [Err] variants.
