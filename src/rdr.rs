@@ -231,6 +231,7 @@ impl Iterator for ReadDirRecursive {
     }
 }
 
+<<<<<<< HEAD
 /// Create an instance of [ReadDirRecursive] for the given path. This operation
 /// will fail if [fs::read_dir] fails while trying to read from the specified path.
 ///
@@ -242,6 +243,32 @@ impl Iterator for ReadDirRecursive {
 ///
 /// let rdr = ReadDirRecursive::new("/some/path").unwrap();
 /// ```
+=======
+/**
+Create an instance of [ReadDirRecursive] for the given path.
+
+Is not lazy **yet**. Std [fs::read_dir] is called immediately to read from the given path,
+so any error coming from that action must be handled to being able start the iteration.
+
+The same can be achieved using [ReadDirRecursive::new].
+
+Example:
+```
+use itfs::rdr::read_dir_recursive;
+
+for (i, r) in read_dir_recursive(".").unwrap().enumerate() {
+        match r {
+            Ok(entry) => {
+                println!("{} Found entry: '{:?}'", i, entry.path());
+            }
+            Err(e) => {
+                eprintln!("{} Found ERROR: {}", i, e);
+            }
+        }
+    }
+```
+*/
+>>>>>>> e8ae31a (improve some rustdocs)
 pub fn read_dir_recursive<P: AsRef<path::Path>>(path: P) -> io::Result<ReadDirRecursive> {
     ReadDirRecursive::new(path)
 }

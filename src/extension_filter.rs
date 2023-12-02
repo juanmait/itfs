@@ -1,14 +1,15 @@
-//! Export the struct `ExtensionFilter`. Filter `DirEntry` items where the file extension is not in a list of allowed ones.
+//! Export the `struct` [`ExtensionFilter`]. Drop [DirEntry] items where the file extension is not in a list of allowed ones.
 
 use std::ffi::{OsStr, OsString};
 use std::fs::DirEntry;
 use std::io::Error;
 
 /// Map an iterator over items of either type [`Result<DirEntry>`] or [`DirEntry`],
-/// into an equivalent one that only let through entries where the file extension
+/// into one equivalent that only will let through entries where the file extension
 /// is in a list of "allowed" ones ("only" filter).
 ///
-/// This iterator does not filter out items of type [Result::Err]..
+/// This iterator does not filter any [Result::Err] coming from the inner iterator
+/// so **they will still pass the filter**.
 pub struct ExtensionFilter<T, I: Iterator<Item = T>>(I, Vec<OsString>);
 
 /// Create an instance of [ExtensionFilter].
