@@ -7,13 +7,13 @@ use itfs::result_filter::ResultFilter;
 fn main() {
     const PATH: &'static str = ".";
 
-    let allowed_extensions = vec!["md", "toml", "o"];
+    let allowed_extensions = ["md", "toml", "o"];
 
     // Use ExtensionFilter for the type `Result<DirEntry>`
     // ---------------------------------------------------------------
 
     let files_iterator = read_dir(PATH).unwrap();
-    let extension_filter = create_extension_filter(files_iterator, allowed_extensions.clone());
+    let extension_filter = create_extension_filter(files_iterator, allowed_extensions);
 
     println!("\nStarting ExtensionFilter -> ReadDir ...");
     for result in extension_filter {
@@ -27,7 +27,7 @@ fn main() {
     let files_iterator = read_dir(PATH).unwrap();
     let result_filter = ResultFilter(files_iterator);
 
-    let extension_filter = create_extension_filter(result_filter, allowed_extensions.clone());
+    let extension_filter = create_extension_filter(result_filter, allowed_extensions);
 
     println!("\nStarting ExtensionFilter -> ResultFilter -> ReadDir ...");
     for item in extension_filter {
@@ -35,7 +35,7 @@ fn main() {
     }
 
     // Same as above but using `ReadDirRecursive` instead of ReadDir
-    // and a different style
+    // and using a more "structured" api
     // ---------------------------------------------------------------
 
     let itr = ExtensionFilter::new(

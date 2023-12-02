@@ -1,12 +1,12 @@
-//! Export the `struct` [`ExtensionFilter`]. Filter [DirEntry] items which extension is not in a list of allowed ones given as param.
+//! Export the struct `ExtensionFilter`. Filter `DirEntry` items where the file extension is not in a list of allowed ones.
 
 use std::ffi::{OsStr, OsString};
 use std::fs::DirEntry;
 use std::io::Error;
 
 /// Map an iterator over items of either type [`Result<DirEntry>`] or [`DirEntry`],
-/// into an equivalent one that only let through entries which file extension is in a list
-/// of "allowed" ones.
+/// into an equivalent one that only let through entries where the file extension
+/// is in a list of "allowed" ones ("only" filter).
 ///
 /// This iterator does not filter out items of type [Result::Err]..
 pub struct ExtensionFilter<T, I: Iterator<Item = T>>(I, Vec<OsString>);
@@ -14,12 +14,12 @@ pub struct ExtensionFilter<T, I: Iterator<Item = T>>(I, Vec<OsString>);
 /// Create an instance of [ExtensionFilter].
 pub fn create_extension_filter<T, I: Iterator<Item = T>, A: AsRef<str>>(
     inner_iter: I,
-    extensions: Vec<A>,
+    extensions: impl IntoIterator<Item = A>,
 ) -> ExtensionFilter<T, I> {
     ExtensionFilter::<T, I>(
         inner_iter,
         extensions
-            .iter()
+            .into_iter()
             .map(|e| OsString::from(e.as_ref()))
             .collect(),
     )
@@ -28,7 +28,7 @@ pub fn create_extension_filter<T, I: Iterator<Item = T>, A: AsRef<str>>(
 /// Implement [ExtensionFilter]
 impl<T, I: Iterator<Item = T>> ExtensionFilter<T, I> {
     /// Create a new instance of [ExtensionFilter].
-    pub fn new<A: AsRef<str>>(inner_iter: I, extensions: Vec<A>) -> Self {
+    pub fn new<A: AsRef<str>>(inner_iter: I, extensions: impl IntoIterator<Item = A>) -> Self {
         create_extension_filter(inner_iter, extensions)
     }
 
