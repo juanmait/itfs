@@ -231,19 +231,6 @@ impl Iterator for ReadDirRecursive {
     }
 }
 
-<<<<<<< HEAD
-/// Create an instance of [ReadDirRecursive] for the given path. This operation
-/// will fail if [fs::read_dir] fails while trying to read from the specified path.
-///
-/// The same can be achieved by passing the path to the `new` method of [ReadDirRecursive].
-///
-/// Example:
-/// ```
-/// use fs_iter::ReadDirRecursive;
-///
-/// let rdr = ReadDirRecursive::new("/some/path").unwrap();
-/// ```
-=======
 /**
 Create an instance of [ReadDirRecursive] for the given path.
 
@@ -268,7 +255,6 @@ for (i, r) in read_dir_recursive(".").unwrap().enumerate() {
     }
 ```
 */
->>>>>>> e8ae31a (improve some rustdocs)
 pub fn read_dir_recursive<P: AsRef<path::Path>>(path: P) -> io::Result<ReadDirRecursive> {
     ReadDirRecursive::new(path)
 }
