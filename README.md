@@ -1,6 +1,6 @@
-# fs_iter
+# itfs
 
-Some rust iterator adaptors useful when iterating over the file system.
+Rust iterator adaptors useful when iterating over the file system.
 
 -   **extension_filter**: Export the struct `ExtensionFilter`. Filter `DirEntry` items where the
     file extension is not in a list of allowed ones.
