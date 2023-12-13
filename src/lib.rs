@@ -7,6 +7,7 @@
 //! -   [result_filter]: Export the struct [`ResultFilter`][result_filter::ResultFilter]. It maps an iterator over items of type
 //!     `Result<T>` into one over items of type `T` by discarding `Err` variants.
 
+pub mod entry_to_path;
 pub mod extension_filter;
 pub mod rdr;
 pub mod result_filter;
