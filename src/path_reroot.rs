@@ -17,6 +17,9 @@ where
 
 /// Given an iterator over items of type [PathBuf] rewrite the root of those that
 /// contains a given prefix, by using another one given as a replacement.
+///
+/// This iterator will yield tuples where the first element is the original
+/// path (as [PathBuf]) and the second is the Result of the operation.
 pub struct PathReRoot<I, P>
 where
     P: AsRef<Path>,
