@@ -1,4 +1,5 @@
-//! Export the `struct` [`ExtensionFilter`]. Drop [DirEntry] items where the file extension is not in a list of allowed ones.
+//! Export the `struct` [`ExtensionFilter`]. Drop [DirEntry] items where the file
+//! extension is not in a list of allowed ones.
 
 use std::ffi::{OsStr, OsString};
 use std::fs::DirEntry;
