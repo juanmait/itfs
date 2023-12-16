@@ -1,7 +1,7 @@
-//! Export the `struct` [`ResultFilter`]. Map an iterator over items of type [Result<T>]
+//! Export the `struct` [`ResultFilter`]. Map an iterator over items of type `Result<T>`
 //! into one over items of type `T` by discarding [Err] variants.
 
-/// Map an iterator over items of type [Result<T>] into one over items of type `T`
+/// Map an iterator over items of type `Result<T>` into one over items of type `T`
 /// by discarding [Err] variants.
 pub struct ResultFilter<T, E, I: Iterator<Item = Result<T, E>>>(pub I);
 

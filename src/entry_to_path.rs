@@ -1,11 +1,11 @@
 //! Export the `struct` [`EntryToPath`]. Maps an iterator over items of
-//! type [DirEntry] or [Result<DirEntry>] into one over items of type
-//! [PathBuf] and [Result<PathBuf>] respectively.
+//! type [DirEntry] or `Result<DirEntry>` into one over items of type
+//! [PathBuf] and `Result<PathBuf>` respectively.
 
 use std::{fs::DirEntry, io::Result, path::PathBuf};
 
-/// Maps an iterator over items of type [DirEntry] or [Result<DirEntry>] into one
-/// over items of type [PathBuf] and [Result<PathBuf>] respectively.
+/// Maps an iterator over items of type [DirEntry] or `Result<DirEntry>` into one
+/// over items of type [PathBuf] and `Result<PathBuf>` respectively.
 pub struct EntryToPath<T, I: Iterator<Item = T>>(pub I);
 
 /// The implementation for [DirEntry] items must yield items of type [PathBuf]
@@ -20,7 +20,7 @@ impl<I: Iterator<Item = DirEntry>> Iterator for EntryToPath<DirEntry, I> {
     }
 }
 
-/// The implementation for [Result<DirEntry>] items must yield items of type [Result<PathBuf>].
+/// The implementation for `Result<DirEntry>` items must yield items of type `Result<PathBuf>`.
 ///
 /// In this implementation any [Err] variant coming out of the original iterator are left "as is".
 impl<I: Iterator<Item = Result<DirEntry>>> Iterator for EntryToPath<Result<DirEntry>, I> {
