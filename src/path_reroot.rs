@@ -32,15 +32,21 @@ where
     I: Iterator<Item = PathBuf>,
     P: AsRef<Path>,
 {
-    type Item = Result<PathBuf, StripPrefixError>;
+    /// Item is a tuple where the first element is the original path
+    /// and the second one is the result of the re root operation
+    type Item = (PathBuf, Result<PathBuf, StripPrefixError>);
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.inner_iter.next() {
-            Some(p) => Some(path_re_root(
-                p.as_path(),
-                self.strip_prefix.as_ref(),
-                self.replace_by.as_ref(),
-            )),
+            Some(p) => {
+                let rooted = path_re_root(
+                    p.as_path(),
+                    self.strip_prefix.as_ref(),
+                    self.replace_by.as_ref(),
+                );
+
+                Some((p, rooted))
+            }
             None => None,
         }
     }

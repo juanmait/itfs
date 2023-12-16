@@ -13,13 +13,13 @@ fn main() {
     let re_rooted = PathReRoot {
         inner_iter: paths,
         strip_prefix: "./examples",
-        replace_by: "",
+        replace_by: "./x/y/z",
     };
 
-    for path in re_rooted {
-        match path {
-            Ok(p) => println!("{:?}", p),
-            Err(e) => println!("{}", e.to_string()),
+    for (original, result) in re_rooted {
+        match result {
+            Ok(re_rooted) => println!("{:?} => {:?}", original, re_rooted),
+            Err(e) => println!("{:?} => {}", original, e.to_string()),
         }
     }
 }
