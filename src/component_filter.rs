@@ -10,8 +10,8 @@ use std::{
 /// Filter those items where any of its path's [Components][std::path::Components]
 /// equals one given as parameter.
 ///
-/// This iterator can accept any iterator that yield items of type [DirEntry], or
-/// [PathBuf][std::path::PathBuf]
+/// This iterator can accept any iterator that yield items of type [`DirEntry`], `Result<DirEntry>`
+/// [`PathBuf`][std::path::PathBuf] and `Result<PathBuf>`.
 ///
 /// ## Example
 /// ```
@@ -74,7 +74,6 @@ impl<I> Iterator for ComponentFilter<'_, DirEntry, I>
 where
     I: Iterator<Item = DirEntry>,
 {
-    /// the item of impl 1
     type Item = I::Item;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -89,6 +88,38 @@ where
 
                     continue;
                 }
+                None => break None,
+            }
+        }
+    }
+}
+
+/// Implement the [Iterator] trait for a inner iterator where the `Item = Result<DirEntry>`.
+///
+/// This implementation works similar to the
+/// [FilterOk](https://docs.rs/itertools/latest/itertools/structs/struct.FilterOk.html)
+/// iterator from the [itertools](https://docs.rs/itertools/latest/itertools/index.html) crate.
+/// `Ok` values from the inner iterator will be filtered out if necessary but any `Err`
+/// variant will still pass the filter untouched.
+impl<I, E> Iterator for ComponentFilter<'_, Result<DirEntry, E>, I>
+where
+    I: Iterator<Item = Result<DirEntry, E>>,
+{
+    type Item = I::Item;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            match self.0.next() {
+                Some(Ok(e)) => {
+                    path_has_component(e.path().as_path(), self.1);
+                    let b = e.path().components().any(|c| c.as_os_str() == self.1);
+                    if !b {
+                        break Some(Ok(e));
+                    }
+
+                    continue;
+                }
+                Some(Err(e)) => break Some(Err(e)),
                 None => break None,
             }
         }
@@ -112,6 +143,38 @@ where
 
                     continue;
                 }
+                None => break None,
+            }
+        }
+    }
+}
+
+/// Implement the [Iterator] trait for a inner iterator where the `Item = Result<PathBuf>`.
+///
+/// This implementation works similar to the
+/// [FilterOk](https://docs.rs/itertools/latest/itertools/structs/struct.FilterOk.html)
+/// iterator from the [itertools](https://docs.rs/itertools/latest/itertools/index.html) crate.
+/// `Ok` values from the inner iterator will be filtered out if necessary but any `Err`
+/// variant will still pass the filter untouched.
+impl<I, E> Iterator for ComponentFilter<'_, Result<PathBuf, E>, I>
+where
+    I: Iterator<Item = Result<PathBuf, E>>,
+{
+    type Item = I::Item;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            match self.0.next() {
+                Some(Ok(e)) => {
+                    path_has_component(e.as_path(), self.1);
+                    let b = e.components().any(|c| c.as_os_str() == self.1);
+                    if !b {
+                        break Some(Ok(e));
+                    }
+
+                    continue;
+                }
+                Some(Err(e)) => break Some(Err(e)),
                 None => break None,
             }
         }

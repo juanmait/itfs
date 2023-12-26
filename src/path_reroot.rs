@@ -77,7 +77,8 @@ mod test {
                 replace_prefix: "/x/y",
                 expect: Some(PathBuf::from("/x/y/c/d")),
             },
-            // prefix can be erased from the target
+            // prefix can be erased from the target by passing an
+            // empty string as `replace_by`
             Subject {
                 path: "/a/b/c/d",
                 strip_prefix: "/a/b",
