@@ -20,7 +20,7 @@ pub struct RDRStats {
 ///
 /// ## Iteration Example:
 /// ```
-/// use fs_iter::ReadDirRecursive;
+/// use itfs::rdr::ReadDirRecursive;
 ///
 /// let rdr = ReadDirRecursive::new(".").unwrap();
 ///
@@ -32,7 +32,7 @@ pub struct RDRStats {
 ///
 /// ## Print some stats afterward:
 /// ```
-/// use fs_iter::ReadDirRecursive;
+/// use itfs::rdr::ReadDirRecursive;
 ///
 /// let mut rdr = ReadDirRecursive::new(".").unwrap();
 ///
@@ -78,9 +78,9 @@ impl ReadDirRecursive {
     /// can fail if [fs::read_dir] fails while trying to read from the specified path.
     ///
     /// ```
-    /// use fs_iter::ReadDirRecursive;
+    /// use itfs::rdr::ReadDirRecursive;
     ///
-    /// let rdr = ReadDirRecursive::new("/some/path").unwrap();
+    /// let rdr = ReadDirRecursive::new(".").unwrap();
     /// ```
     pub fn new<P: AsRef<path::Path>>(path: P) -> io::Result<Self> {
         Ok(ReadDirRecursive {
@@ -257,38 +257,4 @@ for (i, r) in read_dir_recursive(".").unwrap().enumerate() {
 */
 pub fn read_dir_recursive<P: AsRef<path::Path>>(path: P) -> io::Result<ReadDirRecursive> {
     ReadDirRecursive::new(path)
-}
-
-/// Run this tests:
-///
-/// ```
-/// cargo test -- --nocapture
-/// ```
-#[cfg(test)]
-mod test {
-    /// ```bash
-    /// cargo test test::iterate -- --nocapture
-    /// ```
-    #[test]
-    fn iterate() {
-        let rdr = super::ReadDirRecursive::new(".").unwrap();
-
-        for (i, entry_result) in rdr.enumerate() {
-            println!("{} Found file: '{:?}'", i, entry_result.unwrap().path());
-        }
-    }
-
-    /// ```bash
-    /// cargo test test::print_stats -- --nocapture
-    /// ```
-    #[test]
-    fn print_stats() {
-        let mut rdr = super::ReadDirRecursive::new(".").unwrap();
-
-        for (i, entry_result) in rdr.by_ref().enumerate() {
-            println!("{} Found file: '{:?}'", i, entry_result.unwrap().path());
-        }
-
-        println!("{:?}", rdr.stats);
-    }
 }

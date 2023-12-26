@@ -1,5 +1,6 @@
 //! Rust iterator adaptors useful when iterating over the file system.
 
+pub mod component_filter;
 pub mod entry_to_path;
 pub mod extension_filter;
 pub mod path_reroot;

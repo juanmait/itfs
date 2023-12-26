@@ -6,11 +6,11 @@ use std::fs::DirEntry;
 use std::io::Error;
 
 /// Map an iterator over items of either type [`Result<DirEntry>`] or [`DirEntry`],
-/// into one equivalent that only will let through entries where the file extension
+/// into one equivalent that will filter those where the file extension
 /// is in a list of "allowed" ones ("only" filter).
 ///
-/// This iterator does not filter any [Result::Err] coming from the inner iterator
-/// so **they will still pass the filter**.
+/// This iterator does not filter any [Result::Err] coming from the inner iterator.
+/// Those items will still pass the filter.
 pub struct ExtensionFilter<T, I: Iterator<Item = T>>(I, Vec<OsString>);
 
 /// Create an instance of [ExtensionFilter].
