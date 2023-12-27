@@ -100,7 +100,7 @@ where
 /// [FilterOk](https://docs.rs/itertools/latest/itertools/structs/struct.FilterOk.html)
 /// iterator from the [itertools](https://docs.rs/itertools/latest/itertools/index.html) crate.
 /// `Ok` values from the inner iterator will be filtered out if necessary but any `Err`
-/// variant will still pass the filter untouched.
+/// variant coming from the inner iterator will still pass the filter untouched.
 impl<I, E> Iterator for ComponentFilter<'_, Result<DirEntry, E>, I>
 where
     I: Iterator<Item = Result<DirEntry, E>>,
@@ -155,7 +155,7 @@ where
 /// [FilterOk](https://docs.rs/itertools/latest/itertools/structs/struct.FilterOk.html)
 /// iterator from the [itertools](https://docs.rs/itertools/latest/itertools/index.html) crate.
 /// `Ok` values from the inner iterator will be filtered out if necessary but any `Err`
-/// variant will still pass the filter untouched.
+/// variant coming from the inner iterator will still pass the filter untouched.
 impl<I, E> Iterator for ComponentFilter<'_, Result<PathBuf, E>, I>
 where
     I: Iterator<Item = Result<PathBuf, E>>,
