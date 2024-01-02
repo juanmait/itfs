@@ -2,6 +2,8 @@
 
 Rust iterators and iterator adaptors useful when iterating over the file system.
 
+-   **[component_filter]**: Export the struct **`ComponentFilter`**. Filter items where any of its
+    path's [Components][Components] equals one given as parameter.
 -   **[entry_to_path]**: Export the struct **`EntryToPath`**. Maps an iterator over items of type
     [`DirEntry`][DirEntry] or `Result<DirEntry>` into one over items of type [`PathBuf`][PathBuf]
     and `Result<PathBuf>` respectively.
@@ -21,6 +23,7 @@ Rust iterators and iterator adaptors useful when iterating over the file system.
 cargo doc --lib --open
 ```
 
+[component_filter]: ./src/component_filter.rs
 [entry_to_path]: ./src/entry_to_path.rs
 [extension_filter]: ./src/extension_filter.rs
 [path_reroot]: ./src/path_reroot.rs
@@ -30,3 +33,4 @@ cargo doc --lib --open
 [PathBuf]: https://doc.rust-lang.org/std/path/struct.PathBuf.html
 [ReadDir]: https://doc.rust-lang.org/std/fs/struct.ReadDir.html
 [Err]: https://doc.rust-lang.org/core/result/enum.Result.html#variant.Err
+[components]: https://doc.rust-lang.org/stable/std/path/struct.Components.html
