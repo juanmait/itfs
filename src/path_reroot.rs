@@ -5,11 +5,13 @@
 use std::path::{Path, PathBuf, StripPrefixError};
 
 /// function that performs the prefix replacement
-fn path_re_root<P>(path: P, find: P, replace_by: P) -> Result<PathBuf, StripPrefixError>
+/// can fail if `Path::strip_prefix` fails
+/// `Path::strip_prefix` may fail if `base` is not a prefix of `path`
+fn path_re_root<P>(path: P, base: P, replace_by: P) -> Result<PathBuf, StripPrefixError>
 where
     P: AsRef<Path>,
 {
-    match path.as_ref().strip_prefix(find) {
+    match path.as_ref().strip_prefix(base) {
         Ok(rest) => Ok(replace_by.as_ref().join(rest)),
         Err(e) => Err(e),
     }
@@ -18,8 +20,8 @@ where
 /// Given an iterator over items of type [PathBuf] rewrite the root of those that
 /// contains a given prefix, by using another one given as a replacement.
 ///
-/// This iterator will yield tuples where the first element is the original
-/// path (as [PathBuf]) and the second is the Result of the operation.
+/// **This iterator will yield tuples** where the first element is the original
+/// path ([PathBuf]) and the second is a `Result` with the new [PathBuf].
 pub struct PathReRoot<I, P>
 where
     P: AsRef<Path>,
