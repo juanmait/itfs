@@ -5,7 +5,7 @@ use std::{fs, io, path};
 ///
 /// ## Example:
 /// ```
-/// use itfs::rdr::ReadDirRecursive;
+/// use itfs::ReadDirRecursive;
 ///
 /// let rdr = ReadDirRecursive::new(".").unwrap();
 ///
@@ -35,7 +35,7 @@ impl ReadDirRecursive {
     /// will fail if the initial call to [fs::read_dir] fails.
     ///
     /// ```
-    /// use itfs::rdr::ReadDirRecursive;
+    /// use itfs::ReadDirRecursive;
     ///
     /// let rdr = ReadDirRecursive::new(".").unwrap();
     /// ```
@@ -111,7 +111,7 @@ Same behavior as using [ReadDirRecursive::new].
 
 Example:
 ```
-use itfs::rdr::read_dir_recursive;
+use itfs::read_dir_recursive;
 
 for (i, r) in read_dir_recursive(".").unwrap().enumerate() {
         match r {

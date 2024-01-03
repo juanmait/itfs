@@ -15,8 +15,7 @@ use std::{
 ///
 /// ## Example
 /// ```
-/// use itfs::component_filter::ComponentFilter;
-/// use itfs::result_filter::ResultFilter;
+/// use itfs::{ComponentFilter, ResultFilter};
 /// use std::ffi::OsStr;
 ///
 /// let entry_result_iter = std::fs::read_dir(".").unwrap();
@@ -26,7 +25,7 @@ use std::{
 ///
 /// // this iterator will skip any entry where the path contains a component named "target".
 /// let iter = ComponentFilter::new(entry_iter, "target");
-/// ````
+/// ```
 pub struct ComponentFilter<'a, T, I>(pub I, pub &'a OsStr)
 where
     I: Iterator<Item = T>;
@@ -35,8 +34,7 @@ where
 ///
 /// ## Example
 /// ```
-/// use itfs::component_filter::ComponentFilter;
-/// use itfs::result_filter::ResultFilter;
+/// use itfs::{ComponentFilter,ResultFilter};
 /// use std::ffi::OsStr;
 ///
 /// let inner = ResultFilter(std::fs::read_dir(".").unwrap());
@@ -55,8 +53,7 @@ where
     /// ## Example
     ///
     /// ```
-    /// use itfs::component_filter::ComponentFilter;
-    /// use itfs::result_filter::ResultFilter;
+    /// use itfs::{ComponentFilter,ResultFilter};
     ///
     /// let inner_iter = ResultFilter(std::fs::read_dir(".").unwrap());
     ///

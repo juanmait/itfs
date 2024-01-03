@@ -1,4 +1,4 @@
-use itfs::{entry_to_path::EntryToPath, rdr::ReadDirRecursive, result_filter::ResultFilter};
+use itfs::{EntryToPath, ReadDirRecursive, ResultFilter};
 
 /// Demonstrates mapping from [DirEntry] to [PathBuf]
 fn example_entry_to_path<P: AsRef<std::path::Path>>(path: P) {

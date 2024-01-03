@@ -1,4 +1,4 @@
-use itfs::result_filter::ResultFilter;
+use itfs::ResultFilter;
 
 fn main() {
     let items = [

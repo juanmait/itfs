@@ -1,9 +1,6 @@
 use std::ffi::OsStr;
 
-use itfs::{
-    component_filter::ComponentFilter, entry_to_path::EntryToPath, rdr::read_dir_recursive,
-    result_filter::ResultFilter,
-};
+use itfs::{read_dir_recursive, ComponentFilter, EntryToPath, ResultFilter};
 
 /// This example shows that it works for an inner iterator that yields
 /// items of type DirEntry. Also shows how one can initialize ComponentFilter directly

@@ -5,7 +5,7 @@
 use std::path::{Path, PathBuf, StripPrefixError};
 
 /// function that performs the prefix replacement
-pub fn path_re_root<P>(path: P, find: P, replace_by: P) -> Result<PathBuf, StripPrefixError>
+fn path_re_root<P>(path: P, find: P, replace_by: P) -> Result<PathBuf, StripPrefixError>
 where
     P: AsRef<Path>,
 {

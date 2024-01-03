@@ -1,4 +1,4 @@
-use itfs::rdr::read_dir_recursive;
+use itfs::read_dir_recursive;
 
 /// ## Run this example
 ///

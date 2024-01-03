@@ -1,6 +1,6 @@
 use std::fs::read_dir;
 
-use itfs::{path_reroot::PathReRoot, result_filter::ResultFilter};
+use itfs::{PathReRoot, ResultFilter};
 
 fn main() {
     let paths = ResultFilter(
