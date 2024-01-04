@@ -13,20 +13,6 @@ use std::io::Error;
 /// Those items will still pass the filter.
 pub struct ExtensionFilter<T, I: Iterator<Item = T>>(I, Vec<OsString>);
 
-/// Create an instance of [ExtensionFilter].
-pub fn create_extension_filter<T, I: Iterator<Item = T>, A: AsRef<str>>(
-    inner_iter: I,
-    extensions: impl IntoIterator<Item = A>,
-) -> ExtensionFilter<T, I> {
-    ExtensionFilter::<T, I>(
-        inner_iter,
-        extensions
-            .into_iter()
-            .map(|e| OsString::from(e.as_ref()))
-            .collect(),
-    )
-}
-
 /// Implement [ExtensionFilter]
 impl<T, I: Iterator<Item = T>> ExtensionFilter<T, I> {
     /// Create a new instance of [ExtensionFilter].
@@ -51,8 +37,8 @@ impl<T, I: Iterator<Item = T>> ExtensionFilter<T, I> {
 }
 
 /// Implement Iterator for `Item =  Result<DirEntry, Error>`
-impl<T: Iterator<Item = Result<DirEntry, Error>>> Iterator
-    for ExtensionFilter<Result<DirEntry, Error>, T>
+impl<I: Iterator<Item = Result<DirEntry, Error>>> Iterator
+    for ExtensionFilter<Result<DirEntry, Error>, I>
 {
     type Item = Result<DirEntry, Error>;
 
@@ -80,9 +66,9 @@ impl<T: Iterator<Item = Result<DirEntry, Error>>> Iterator
     }
 }
 
-/// Implement Iterator for `Item =  DirEntry`
-impl<T: Iterator<Item = DirEntry>> Iterator for ExtensionFilter<DirEntry, T> {
-    type Item = T::Item;
+/// Implement Iterator for `Item = DirEntry`
+impl<I: Iterator<Item = DirEntry>> Iterator for ExtensionFilter<DirEntry, I> {
+    type Item = I::Item;
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             match self.0.next() {
@@ -99,4 +85,18 @@ impl<T: Iterator<Item = DirEntry>> Iterator for ExtensionFilter<DirEntry, T> {
             }
         }
     }
+}
+
+/// Create an instance of [ExtensionFilter].
+pub fn create_extension_filter<T, I: Iterator<Item = T>, A: AsRef<str>>(
+    inner_iter: I,
+    extensions: impl IntoIterator<Item = A>,
+) -> ExtensionFilter<T, I> {
+    ExtensionFilter::<T, I>(
+        inner_iter,
+        extensions
+            .into_iter()
+            .map(|e| OsString::from(e.as_ref()))
+            .collect(),
+    )
 }
