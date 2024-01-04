@@ -4,6 +4,7 @@
 use std::ffi::{OsStr, OsString};
 use std::fs::DirEntry;
 use std::io::Error;
+use std::path::PathBuf;
 
 /// Map an iterator over items of either type [`Result<DirEntry>`] or [`DirEntry`],
 /// into one equivalent that will filter those where the file extension
@@ -73,6 +74,27 @@ impl<I: Iterator<Item = DirEntry>> Iterator for ExtensionFilter<DirEntry, I> {
         loop {
             match self.0.next() {
                 Some(entry) => match entry.path().extension() {
+                    Some(ext) => {
+                        if self.is_allowed_extension(ext) {
+                            break Some(entry);
+                        }
+                        continue; // extension not allowed
+                    }
+                    None => continue, // no extension
+                },
+                None => break None, // self.0 reached the end
+            }
+        }
+    }
+}
+
+/// Implement Iterator for ExtensionFilter where `Item = PathBuf`
+impl<I: Iterator<Item = PathBuf>> Iterator for ExtensionFilter<PathBuf, I> {
+    type Item = I::Item;
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            match self.0.next() {
+                Some(entry) => match entry.extension() {
                     Some(ext) => {
                         if self.is_allowed_extension(ext) {
                             break Some(entry);
