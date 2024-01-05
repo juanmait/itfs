@@ -7,7 +7,7 @@ Rust iterators and iterator adaptors useful when iterating over the file system.
 -   **[entry_to_path]**: Export the struct **`EntryToPath`**. Maps an iterator over items of type
     [`DirEntry`][DirEntry] or `Result<DirEntry>` into one over items of type [`PathBuf`][PathBuf]
     and `Result<PathBuf>` respectively.
--   **[extension_filter]**: Export the struct **`ExtensionFilter`**. Filter [`DirEntry`][DirEntry]
+-   **[only_extensions]**: Export the struct **`OnlyExtensions`**. Filter [`DirEntry`][DirEntry]
     items where the file extension is not in a list of allowed ones.
 -   **[path_reroot]**: Export the struct **`PathReRoot`**. Given an iterator over items of type
     [PathBuf] rewrite the root of those that contains a given prefix, by using another one given as
@@ -25,7 +25,7 @@ cargo doc --lib --open
 
 [component_filter]: ./src/component_filter.rs
 [entry_to_path]: ./src/entry_to_path.rs
-[extension_filter]: ./src/extension_filter.rs
+[only_extensions]: ./src/only_extensions.rs
 [path_reroot]: ./src/path_reroot.rs
 [rdr]: ./src/rdr.rs
 [result_filter]: ./src/result_filter.rs
