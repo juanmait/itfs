@@ -1,7 +1,7 @@
 use std::ffi::OsStr;
 
 use itfs::{
-    ext::only_extensions_ext::OnlyExtensionsExt, read_dir_recursive, EntryToPath, ResultFilter,
+    ext::only_extensions_ext::AllowExtensionsExt, read_dir_recursive, EntryToPath, ResultFilter,
 };
 
 fn main() {

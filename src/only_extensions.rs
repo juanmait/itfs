@@ -1,4 +1,4 @@
-//! Export the `struct` [`OnlyExtensions`]. Only will let through entries which extensions
+//! Export the `struct` [`AllowExtensions`]. Only will let through entries which extensions
 /// are in a list of "allowed" ones.
 use std::ffi::OsStr;
 use std::fs::DirEntry;
@@ -11,11 +11,16 @@ use std::path::PathBuf;
 ///
 /// This iterator does not filter any [Result::Err] coming from the inner iterator.
 /// Those items will still pass the filter.
-pub struct OnlyExtensions<'a, T, I: Iterator<Item = T>>(pub I, pub &'a Vec<&'a OsStr>);
+pub struct AllowExtensions<'a, T, I: Iterator<Item = T>>(
+    /// Iterator to be filtered
+    pub I,
+    /// Reference to a vector of allowed extensions
+    pub &'a Vec<&'a OsStr>,
+);
 
 /// Supports iterators over items of type `Result<DirEntry, Error>`
 impl<I: Iterator<Item = Result<DirEntry, Error>>> Iterator
-    for OnlyExtensions<'_, Result<DirEntry, Error>, I>
+    for AllowExtensions<'_, Result<DirEntry, Error>, I>
 {
     type Item = Result<DirEntry, Error>;
 
@@ -44,7 +49,7 @@ impl<I: Iterator<Item = Result<DirEntry, Error>>> Iterator
 }
 
 /// Supports iterators over items of type [DirEntry]
-impl<I: Iterator<Item = DirEntry>> Iterator for OnlyExtensions<'_, DirEntry, I> {
+impl<I: Iterator<Item = DirEntry>> Iterator for AllowExtensions<'_, DirEntry, I> {
     type Item = I::Item;
     fn next(&mut self) -> Option<Self::Item> {
         loop {
@@ -65,7 +70,7 @@ impl<I: Iterator<Item = DirEntry>> Iterator for OnlyExtensions<'_, DirEntry, I> 
 }
 
 /// Supports iterators over items of type [PathBuf]
-impl<I: Iterator<Item = PathBuf>> Iterator for OnlyExtensions<'_, PathBuf, I> {
+impl<I: Iterator<Item = PathBuf>> Iterator for AllowExtensions<'_, PathBuf, I> {
     type Item = I::Item;
     fn next(&mut self) -> Option<Self::Item> {
         loop {

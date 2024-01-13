@@ -7,7 +7,7 @@ Rust iterators and iterator adaptors useful when iterating over the file system.
 -   **[entry_to_path]**: Export the struct **`EntryToPath`**. Maps an iterator over items of type
     [`DirEntry`][DirEntry] or `Result<DirEntry>` into one over items of type [`PathBuf`][PathBuf]
     and `Result<PathBuf>` respectively.
--   **[only_extensions]**: Export the struct **`OnlyExtensions`**. Only will let through entries
+-   **[only_extensions]**: Export the struct **`AllowExtensions`**. Only will let through entries
     which extensions are in a list of "allowed" ones.
 -   **[path_reroot]**: Export the struct **`PathReRoot`**. Given an iterator over items of type
     [PathBuf] rewrite the root of those that contains a given prefix, by using another one given as
