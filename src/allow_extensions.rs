@@ -6,8 +6,8 @@ use std::io::Error;
 use std::path::PathBuf;
 
 /// Map an iterator over items of either type [`Result<DirEntry>`] or [`DirEntry`] or [`PathBuf`],
-/// into one equivalent that will only let through the ones which extensions
-/// are in a list of "allowed" ones.
+/// into one equivalent that will only let through entries which file extensions are in a list of
+/// "allowed" ones.
 ///
 /// This iterator does not filter any [Result::Err] coming from the inner iterator.
 /// Those items will still pass the filter.

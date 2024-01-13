@@ -1,3 +1,3 @@
-//! Modules that implement traits that extends pre existing types with new functionality.
+//! Extension modules that implement traits that extends pre existing types with new functionality.
 
-pub mod only_extensions_ext;
+pub mod allow_extensions_ext;
