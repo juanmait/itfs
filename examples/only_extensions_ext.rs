@@ -10,7 +10,7 @@ fn main() {
 
     // Support iterators over items of type: [`DirEntry`] ...
     let orig_iter = ResultFilter(read_dir_recursive(root_path).unwrap());
-    let next_iter = orig_iter.only_extensions(&allowed_extensions);
+    let next_iter = orig_iter.allow_extensions(&allowed_extensions);
 
     for item in next_iter {
         println!("{:?}", item);
@@ -18,7 +18,7 @@ fn main() {
 
     // Support iterators over items of type: [Result<DirEntry>] ...
     let orig_iter = read_dir_recursive(root_path).unwrap();
-    let next_iter = orig_iter.only_extensions(&allowed_extensions);
+    let next_iter = orig_iter.allow_extensions(&allowed_extensions);
 
     for item in next_iter {
         println!("{:?}", item);
@@ -26,7 +26,7 @@ fn main() {
 
     // Support iterators over items type: `[PathBuf]` ...
     let orig_iter = EntryToPath(ResultFilter(read_dir_recursive(root_path).unwrap()));
-    let next_iter = orig_iter.only_extensions(&allowed_extensions);
+    let next_iter = orig_iter.allow_extensions(&allowed_extensions);
 
     for entry in next_iter {
         println!("{:?}", entry)

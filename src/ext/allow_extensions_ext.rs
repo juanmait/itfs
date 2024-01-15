@@ -10,7 +10,7 @@ pub trait AllowExtensionsExt<'a, T>: Iterator<Item = T> + Sized {
     /// file extension is NOT in the provided list of allowed ones.
     ///
     /// The resulting iterator won't change the type of the items coming from the original iterator.
-    fn only_extensions(self, extensions: &'a Vec<&'a OsStr>) -> AllowExtensions<'a, T, Self> {
+    fn allow_extensions(self, extensions: &'a Vec<&'a OsStr>) -> AllowExtensions<'a, T, Self> {
         return AllowExtensions(self, extensions);
     }
 }

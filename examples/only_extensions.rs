@@ -1,8 +1,6 @@
 use std::{ffi::OsStr, fs::read_dir};
 
-use itfs::{
-    ext::allow_extensions_ext::AllowExtensionsExt, AllowExtensions, EntryToPath, ResultFilter,
-};
+use itfs::{AllowExtensions, EntryToPath, ResultFilter};
 
 fn main() {
     let root_path = ".";
@@ -11,7 +9,7 @@ fn main() {
 
     // Support iterators over items of type: [`DirEntry`] ...
 
-    let orig_iter = ResultFilter(read_dir(root_path).unwrap()).only_extensions(&allowed_extensions);
+    let orig_iter = ResultFilter(read_dir(root_path).unwrap());
     let next_iter = AllowExtensions(orig_iter, &allowed_extensions);
 
     for entry in next_iter {
