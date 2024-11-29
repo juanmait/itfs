@@ -14,7 +14,11 @@ fn works_for_dir_entry() {
 
     // without using the method `ComponentFilter::new` we have to pass a `OsStr`
     // as the second parameter
-    let iter = ComponentFilter(dir_entry_iter, OsStr::new("target"));
+    let iter = ComponentFilter(
+        dir_entry_iter,
+        OsStr::new("target"),
+        itfs::ComponentFilterOperationType::Exclude,
+    );
 
     let iter_started = std::time::Instant::now();
     for entry in iter {
@@ -41,7 +45,11 @@ fn works_for_pathbuf() {
     let path_buf_iter = EntryToPath(dir_entry_iter);
 
     // using the `new` method we can pass a plain &str directly as second parameter
-    let iter = ComponentFilter::new(path_buf_iter, "target");
+    let iter = ComponentFilter::new(
+        path_buf_iter,
+        "target",
+        itfs::ComponentFilterOperationType::Exclude,
+    );
 
     let iter_started = std::time::Instant::now();
     for path in iter {
